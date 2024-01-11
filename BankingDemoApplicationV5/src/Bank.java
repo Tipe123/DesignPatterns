@@ -1,0 +1,88 @@
+import java.util.Date;
+import java.util.HashMap;
+
+public class Bank {
+
+    private HashMap<Integer,BankAccount> accounts;
+    private int nextacct;
+
+    public Bank(HashMap<Integer,BankAccount> accounts,int nextacct){
+        this.accounts = accounts;
+        this.nextacct = nextacct;
+    }
+
+    public int newAccount(int type, boolean isForeign){
+
+        int acctnum = this.nextacct++;
+        BankAccount bankAccount;
+
+        if(type ==1 )
+            bankAccount = new SavingsAccount(acctnum);
+        else
+            bankAccount = new CheckingAccount(acctnum);
+
+        bankAccount.setForeign(isForeign);
+        this.accounts.put(acctnum,bankAccount);
+
+        return acctnum;
+    }
+
+    /**
+     * Since the variable bankAccount is interface-typed, the method does not know
+        whether the account it gets from the map is a savings account or checking account.
+     *
+     * But it doesn't need to know, the method simply calls bankAccount.getBalance(),
+        which will execute the code of whichever the object bankAccount refers to.
+     *
+     *
+     * The statement accounts.get(acctnum) will get the object at which the bankAccount variable will reference
+     *
+     * */
+    public int getBalance(int acctnum){
+
+        BankAccount bankAccount = accounts.get(acctnum);
+        return bankAccount.getBalance();
+    }
+
+
+    public void deposit(int acctnum,int amt){
+        BankAccount bankAccount = accounts.get(acctnum);
+
+        if(bankAccount.isForeign())
+            System.out.println(acctnum +"\n"+amt+"\n"+new Date());
+        bankAccount.deposit(amt);
+    }
+
+    public void setForeign(int acctnum,boolean isforeign){
+        BankAccount bankAccount = accounts.get(acctnum);
+        bankAccount.setForeign(isforeign);
+    }
+
+    public boolean authorizedLoan(int acctnum,int loanamt){
+        BankAccount bankAccount = accounts.get(acctnum);
+
+        return bankAccount.hasEnoughCollateral(loanamt);
+    }
+
+    @Override
+    public String toString() {
+        String result = "The bank has "+ accounts.size() + " accounts.";
+        for(BankAccount bankAccount : accounts.values()){
+            result += "\n\t" + bankAccount.toString();
+        }
+
+        return result;
+    }
+
+    public void addInterest(){
+        for(BankAccount bankAccount: accounts.values())
+            if (bankAccount instanceof SavingsAccount){
+                //Type casting
+                SavingsAccount savingsAccount = (SavingsAccount) bankAccount;
+
+                // due to type-casting now the method of addInterest is legal
+                savingsAccount.addInterest();
+            }
+    }
+
+}
